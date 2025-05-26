@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigating the Labyrinth of Learning: An Interactive Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices:
+        - Report Info: Table 1 (Procrastination). Goal: Understand procrastination. Viz/Presentation: Interactive cards. Interaction: Click to expand details. Justification: Engaging. Library/Method: HTML/Tailwind/JS.
+        - Report Info: Table 2 (Mindsets). Goal: Compare mindsets. Viz/Presentation: Side-by-side comparison. Interaction: Direct visual comparison. Justification: Clarity. Library/Method: HTML/Tailwind/JS.
+        - Report Info: Table 3 (Anxiety Toolkit). Goal: Actionable techniques. Viz/Presentation: Accordion list. Interaction: Click to expand. Justification: Easy access. Library/Method: HTML/Tailwind/JS.
+        - Report Info: Table 4 (SMART Goals). Goal: Guide SMART goal setting. Viz/Presentation: Interactive form fields. Interaction: User input. Justification: Practical application. Library/Method: HTML/Tailwind/JS.
+        - Report Info: Table 5 (Abandoning Learning). Goal: Solutions to pitfalls. Viz/Presentation: Interactive cards. Interaction: Click to expand. Justification: Problem/solution. Library/Method: HTML/Tailwind/JS.
+        - AI Feature 1: Personalized Strategy Advisor (Challenges Section). Goal: Provide tailored advice for user-described learning hurdles. Interaction: User inputs challenge, AI generates strategies. Justification: Personalized support. Library/Method: Gemini API, HTML/Tailwind/JS.
+        - AI Feature 2: SMART Goal Enhancer (Strategies Section). Goal: Help users refine and expand their SMART goals. Interaction: User inputs draft goal, AI provides suggestions. Justification: Actionable goal improvement. Library/Method: Gemini API, HTML/Tailwind/JS.
+        - General Content: Key text summarized. Icons (Unicode). No Chart.js.
+        - Diagrams: Structured HTML/CSS/Tailwind.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .section-active {
+            color: #EA580C; /* orange-600 */
+            border-bottom-width: 2px;
+            border-color: #EA580C;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .table-card {
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .table-card-header {
+            cursor: pointer;
+        }
+
+        .table-card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .table-card.open .table-card-content {
+            max-height: 1000px;
+        }
+
+        .nav-link {
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: auto;
+            max-height: 400px;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #EA580C;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ai-response-box {
+            background-color: #fff7ed;
+            border-left: 4px solid #fb923c;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+<header class="bg-white shadow-md sticky top-0 z-50">
+    <nav class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center">
+                <span class="font-bold text-xl text-orange-600">Learning Journey</span>
+            </div>
+            <div class="hidden md:block">
+                <div class="ml-10 flex items-baseline space-x-4">
+                    <a href="#introduction"
+                       class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:text-orange-600">Home</a>
+                    <a href="#challenges"
+                       class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:text-orange-600">Challenges</a>
+                    <a href="#strengths"
+                       class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:text-orange-600">Strengths</a>
+                    <a href="#strategies"
+                       class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:text-orange-600">Strategies</a>
+                    <a href="#persistence"
+                       class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:text-orange-600">Persistence</a>
+                    <a href="#rewards"
+                       class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:text-orange-600">Rewards</a>
+                </div>
+            </div>
+            <div class="-mr-2 flex md:hidden">
+                <button type="button" id="mobile-menu-button"
+                        class="bg-white inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500"
+                        aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="sr-only">Open main menu</span>
+                    <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+    <div class="md:hidden hidden" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="#introduction"
+               class="nav-link-mobile block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-orange-600 hover:bg-slate-50">Home</a>
+            <a href="#challenges"
+               class="nav-link-mobile block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-orange-600 hover:bg-slate-50">Challenges</a>
+            <a href="#strengths"
+               class="nav-link-mobile block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-orange-600 hover:bg-slate-50">Strengths</a>
+            <a href="#strategies"
+               class="nav-link-mobile block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-orange-600 hover:bg-slate-50">Strategies</a>
+            <a href="#persistence"
+               class="nav-link-mobile block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-orange-600 hover:bg-slate-50">Persistence</a>
+            <a href="#rewards"
+               class="nav-link-mobile block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-orange-600 hover:bg-slate-50">Rewards</a>
+        </div>
+    </div>
+</header>
+
+<main class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <section id="introduction" class="content-section active pt-16 -mt-16">
+        <div class="bg-white shadow-xl rounded-lg p-6 md:p-10">
+            <h1 class="text-4xl font-bold text-orange-600 mb-6">Welcome to Your Learning Journey Guide!</h1>
+            <p class="text-lg text-slate-700 mb-4">Embarking on learning something new and complex, like a language or
+                programming, is exciting but can also feel daunting. This interactive guide, based on the report
+                "Navigating the Labyrinth of Learning," is here to help you understand common challenges, build a
+                resilient mindset, and discover effective strategies to persist and succeed. Now with AI-powered
+                features to personalize your journey!</p>
+            <p class="text-lg text-slate-700 mb-4">Here, you'll explore why learning can feel uncomfortable, how to
+                harness your motivation, and practical steps to tackle difficulties. The goal is to empower you with
+                knowledge and tools to not just start, but to sustain your learning journey and reap its many rewards.
+                Let's begin!</p>
+            <div class="mt-8 text-center">
+                <button onclick="navigateToSection('challenges')"
+                        class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    Start Exploring Challenges <span class="ml-2">➔</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="challenges" class="content-section pt-16 -mt-16">
+        <div class="bg-white shadow-xl rounded-lg p-6 md:p-10">
+            <h2 class="text-3xl font-bold text-sky-600 mb-6">Section 1: Understanding the Landscape of Learning
+                Discomfort</h2>
+            <p class="text-slate-700 mb-6">The path to new skills often involves discomfort. This section helps you
+                understand why new skills can feel uncomfortable, the true nature of procrastination, and the impact of
+                fearing failure. Recognizing these aspects is the first step to managing them effectively.</p>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">1.1 Why New Skills Feel Uncomfortable: The
+                        Brain's Response</h3>
+                    <p class="text-slate-600 mb-2">Learning new, complex skills pushes you out of your comfort
+                        zone...</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">1.2 The Nature of Procrastination: More Than
+                        Poor Time Management</h3>
+                    <p class="text-slate-600 mb-4">Perfectionism often fuels procrastination...</p>
+                    <h4 class="text-xl font-semibold text-slate-700 my-4">Understanding Procrastination: Roots and
+                        Responses (Interactive)</h4>
+                    <p class="text-slate-600 mb-4">Click on each root cause to explore its mechanism and effective
+                        coping strategies.</p>
+                    <div id="procrastinationTable" class="grid md:grid-cols-2 gap-4"></div>
+                </div>
+
+                <div class="mt-8 p-6 border border-amber-300 rounded-lg bg-amber-50">
+                    <h4 class="text-xl font-semibold text-amber-700 mb-3">✨ Personalized Strategy Advisor</h4>
+                    <p class="text-slate-600 mb-3">Feeling stuck? Describe your current learning challenge below, and
+                        our AI advisor will suggest personalized strategies based on this guide's principles.</p>
+                    <textarea id="challengeInput" rows="3"
+                              class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                              placeholder="E.g., 'I keep putting off studying for my programming exam because I'm afraid I'll fail.' or 'I want to learn French but I lose motivation after a few days.'"></textarea>
+                    <button id="getAIAdviceButton"
+                            class="mt-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:shadow-md transition duration-150 ease-in-out">
+                        Get AI-Powered Advice
+                    </button>
+                    <div id="aiAdviceOutput" class="mt-4 ai-response-box hidden"></div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3 mt-8">1.3 Fear of Failure: The Paralyzing
+                        Effect</h3>
+                    <p class="text-slate-600 mb-4">This creates a cycle: Fear of failure → Procrastination → ...</p>
+                    <div class="mt-4 p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <p class="text-sky-700 font-semibold">🧠 Brain Fact: Temporal Discounting</p>
+                        <p class="text-slate-600 text-sm">Our brains tend to value immediate rewards more than distant
+                            ones...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="strengths" class="content-section pt-16 -mt-16">
+        <div class="bg-white shadow-xl rounded-lg p-6 md:p-10">
+            <h2 class="text-3xl font-bold text-sky-600 mb-6">Section 2: Building a Resilient and Motivated Learner's
+                Mindset</h2>
+            <p class="text-slate-700 mb-6">Overcoming learning discomfort requires a strong internal framework...</p>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">2.1 The Power of "Yet": Cultivating a Growth
+                        Mindset</h3>
+                    <p class="text-slate-600 mb-4">A key tool is adding "yet" to self-statements...</p>
+                    <h4 class="text-xl font-semibold text-slate-700 my-4">Fixed Mindset vs. Growth Mindset: Impact on
+                        Learning (Interactive)</h4>
+                    <p class="text-slate-600 mb-4">Explore the differences in perspective and behavior for each aspect
+                        of learning.</p>
+                    <div id="mindsetTable" class="space-y-3"></div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">2.2 Fueling Your Learning Engine:
+                        Understanding Motivation</h3>
+                    <p class="text-slate-600 mb-4">Boost motivation by connecting learning to personal values...</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">2.3 Developing Grit and Resilience: Keys to
+                        Long-Term Persistence</h3>
+                    <p class="text-slate-600">Persistence arises from the interplay of a growth mindset...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="strategies" class="content-section pt-16 -mt-16">
+        <div class="bg-white shadow-xl rounded-lg p-6 md:p-10">
+            <h2 class="text-3xl font-bold text-sky-600 mb-6">Section 3: Actionable Strategies for Tackling Challenging
+                Learning Goals</h2>
+            <p class="text-slate-700 mb-6">With a resilient mindset, you need concrete techniques...</p>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">3.1 Confronting Discomfort: Practical
+                        Techniques</h3>
+                    <p class="text-slate-600 mb-4">Directly addressing negative emotions is key. Click on each category
+                        to explore specific strategies:</p>
+                    <div id="discomfortToolkit" class="space-y-3"></div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">3.2 Breaking Down Behemoths: Structuring
+                        Learning</h3>
+                    <p class="text-slate-600 mb-2">Large goals can be daunting...</p>
+                    <h4 class="text-xl font-semibold text-slate-700 my-4">Setting SMART Goals (Interactive)</h4>
+                    <p class="text-slate-600 mb-4">Use the SMART criteria to structure your learning. Try outlining a
+                        goal below:</p>
+                    <div id="smartGoalSetter"
+                         class="p-4 border border-orange-200 rounded-lg bg-orange-50 space-y-3"></div>
+
+                    <div class="mt-6 p-4 border border-teal-300 rounded-lg bg-teal-50">
+                        <h5 class="text-lg font-semibold text-teal-700 mb-2">✨ SMART Goal Enhancer</h5>
+                        <p class="text-slate-600 mb-3">Once you've drafted your SMART goal components above, let our AI
+                            help you refine and expand on it for maximum clarity and impact.</p>
+                        <button id="enhanceGoalButton"
+                                class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-md shadow hover:shadow-md transition duration-150 ease-in-out">
+                            Enhance My Goal with AI
+                        </button>
+                        <div id="enhancedGoalOutput" class="mt-3 ai-response-box hidden"></div>
+                    </div>
+                    <p class="text-slate-600 mt-4"><strong>Time-Chunking (Pomodoro Technique):</strong> Work in focused
+                        intervals...</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">3.3 Effective Study Habits</h3>
+                    <p class="text-slate-600 mb-4">Managing Frustration: ...</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">3.4 The Momentum Multiplier: Celebrating
+                        Small Wins</h3>
+                    <p class="text-slate-600">Celebrating small wins nurtures competence...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="persistence" class="content-section pt-16 -mt-16">
+        <div class="bg-white shadow-xl rounded-lg p-6 md:p-10">
+            <h2 class="text-3xl font-bold text-sky-600 mb-6">Section 4: Sustaining the Journey: Persisting Without
+                Giving Up</h2>
+            <p class="text-slate-700 mb-6">Mastery is a marathon...</p>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">4.1 Common Pitfalls and How to Avoid Them
+                        (Interactive)</h3>
+                    <p class="text-slate-600 mb-4">Understanding why people abandon learning helps avoid these pitfalls.
+                        Click on each pitfall to see its underlying driver and an avoidance strategy.</p>
+                    <div id="pitfallsTable" class="grid md:grid-cols-2 gap-4"></div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">4.2 Strategies for Combating Learning Fatigue
+                        and Burnout</h3>
+                    <p class="text-slate-600">Preventing burnout involves nurturing intrinsic motivation...</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">4.3 Maintaining Long-Term Engagement &
+                        Lifelong Learning Habits</h3>
+                    <p class="text-slate-600">View learning as an evolving relationship...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="rewards" class="content-section pt-16 -mt-16">
+        <div class="bg-white shadow-xl rounded-lg p-6 md:p-10">
+            <h2 class="text-3xl font-bold text-sky-600 mb-6">Section 5: The Rewards of Perseverance: Benefits of
+                Mastering New Skills</h2>
+            <p class="text-slate-700 mb-6">The challenging journey of skill acquisition yields rich rewards...</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">5.1 Cognitive and Psychological
+                        Advantages</h3>
+                    <p class="text-slate-600 mt-3">This creates an "upward spiral": achievement fuels confidence...</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-slate-700 mb-3">5.2 Practical and Professional Gains</h3>
+                    <p class="text-slate-600 mt-3">Ultimately, you cultivate the *metaskill* of learning how to
+                        learn...</p>
+                </div>
+            </div>
+            <div class="mt-10 bg-orange-50 p-6 rounded-lg border border-orange-200">
+                <h3 class="text-2xl font-bold text-orange-600 mb-4">Conclusion: Embrace the Journey of Growth!</h3>
+                <p class="text-slate-700 mt-4">By embracing these principles, your learning labyrinth becomes a
+                    navigable path...</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="bg-slate-800 text-slate-300 py-8 mt-12 text-center">
+    <p class="text-sm">Interactive Guide based on "Navigating the Labyrinth of Learning".</p>
+    <p class="text-xs mt-1">Designed to empower your learning journey. AI features powered by Gemini.</p>
+</footer>
+
+<div id="messageModal" class="modal">
+    <div class="modal-content">
+        <div id="modalLoader" class="loader hidden"></div>
+        <p id="modalMessageText"></p>
+        <button id="modalCloseButton"
+                class="mt-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-md">Close
+        </button>
+    </div>
+</div>
+
+<script>
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
+    const sections = document.querySelectorAll('.content-section');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    // Modal elements
+    const messageModal = document.getElementById('messageModal');
+    const modalMessageText = document.getElementById('modalMessageText');
+    const modalLoader = document.getElementById('modalLoader');
+    const modalCloseButton = document.getElementById('modalCloseButton');
+
+    modalCloseButton.addEventListener('click', () => {
+        messageModal.style.display = 'none';
+    });
+
+    function showModal(message, showLoader = false) {
+        modalMessageText.textContent = message;
+        if (showLoader) {
+            modalLoader.classList.remove('hidden');
+            modalCloseButton.classList.add('hidden');
+        } else {
+            modalLoader.classList.add('hidden');
+            modalCloseButton.classList.remove('hidden');
+        }
+        messageModal.style.display = 'block';
+    }
+
+    function hideModal() {
+        messageModal.style.display = 'none';
+    }
+
+
+    function setActiveLink(hash) {
+        navLinks.forEach(link => {
+            link.classList.toggle('section-active', link.getAttribute('href') === hash);
+        });
+        mobileNavLinks.forEach(link => {
+            link.classList.toggle('bg-slate-100', link.getAttribute('href') === hash);
+            link.classList.toggle('text-orange-600', link.getAttribute('href') === hash);
+        });
+    }
+
+    function showSection(hash) {
+        sections.forEach(section => {
+            section.classList.toggle('active', '#' + section.id === hash);
+        });
+        setActiveLink(hash);
+        const targetSection = document.querySelector(hash);
+        if (targetSection) {
+            const headerOffset = document.querySelector('header').offsetHeight;
+            const elementPosition = targetSection.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({top: offsetPosition, behavior: "smooth"});
+        }
+    }
+
+    function navigateToSection(sectionId) {
+        const hash = '#' + sectionId;
+        history.pushState(null, null, hash);
+        showSection(hash);
+        if (!mobileMenu.classList.contains('hidden')) {
+            mobileMenu.classList.add('hidden');
+            mobileMenuButton.setAttribute('aria-expanded', 'false');
+            const icons = mobileMenuButton.querySelectorAll('svg');
+            icons[0].classList.remove('hidden');
+            icons[1].classList.add('hidden');
+        }
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateToSection(link.getAttribute('href').substring(1));
+        });
+    });
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateToSection(link.getAttribute('href').substring(1));
+        });
+    });
+
+    mobileMenuButton.addEventListener('click', () => {
+        const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true' || false;
+        mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+        mobileMenu.classList.toggle('hidden');
+        mobileMenuButton.querySelectorAll('svg').forEach(icon => icon.classList.toggle('hidden'));
+    });
+
+    window.addEventListener('popstate', () => {
+        showSection(window.location.hash || '#introduction');
+    });
+    showSection(window.location.hash || '#introduction');
+
+    const procrastinationData = [
+        {
+            root: "Emotional Avoidance",
+            mechanism: "Limbic system seeks immediate relief...",
+            strategy: "Address underlying emotions..."
+        },
+        {
+            root: "Fear of Failure/Perfectionism",
+            mechanism: "Anxiety about not meeting high standards...",
+            strategy: "Reframe failure as a learning opportunity..."
+        },
+        {
+            root: "Task Aversiveness (boring, frustrating)",
+            mechanism: "Low intrinsic interest or high perceived effort...",
+            strategy: "Reframe the task to find personal meaning..."
+        },
+        {
+            root: "Temporal Discounting",
+            mechanism: "Brain devalues future rewards...",
+            strategy: "Make future rewards salient..."
+        },
+        {
+            root: "Low Self-Efficacy/Self-Doubt",
+            mechanism: "Lack of belief in one's ability...",
+            strategy: "Build competence through small steps..."
+        }
+    ];
+
+    const mindsetData = [
+        {
+            aspect: "Belief about Abilities",
+            fixed: "Abilities are innate...",
+            growth: "Abilities can be developed...",
+            yet: "\"I'm not smart enough\" becomes \"I'm not smart enough *yet*.\""
+        },
+        {
+            aspect: "Approach to Challenges",
+            fixed: "Avoids challenges...",
+            growth: "Embraces challenges...",
+            yet: "\"This is too hard for me\" becomes \"This is too hard for me *yet*.\""
+        },
+        {
+            aspect: "View of Effort",
+            fixed: "Sees effort as unnecessary...",
+            growth: "Views effort as essential...",
+            yet: "\"Trying hard isn't helping\" becomes \"Trying hard... *yet*; I need a better strategy.\""
+        },
+        {
+            aspect: "Response to Mistakes/Failure",
+            fixed: "Views mistakes as proof...",
+            growth: "Sees mistakes as learning opportunities...",
+            yet: "\"I failed\" becomes \"I haven't succeeded *yet*.\""
+        },
+        {
+            aspect: "Reaction to Feedback",
+            fixed: "Becomes defensive...",
+            growth: "Welcomes feedback...",
+            yet: "\"Their feedback means I'm not good\" becomes \"Their feedback shows... *yet*.\""
+        },
+        {
+            aspect: "Inspiration from Others' Success",
+            fixed: "Feels threatened...",
+            growth: "Finds lessons and inspiration...",
+            yet: "\"I'll never be as good as them\" becomes \"I'm not as good as them *yet*.\""
+        },
+        {
+            aspect: "Likelihood of Persistence",
+            fixed: "Low; gives up easily...",
+            growth: "High; persists in difficulties...",
+            yet: "\"I give up\" becomes \"I need a break... *yet*.\""
+        }
+    ];
+
+    const discomfortToolkitData = [
+        {
+            category: "Cognitive Restructuring",
+            strategies: [{
+                name: "Identify & Challenge Negative Thoughts",
+                detail: "Reduces irrational fears..."
+            }, {name: "Reframe Failure", detail: "Shifts perspective..."}]
+        },
+        {
+            category: "Behavioral Exposure",
+            strategies: [{
+                name: "Create a Fear Hierarchy & Practice Gradual Exposure",
+                detail: "Systematically desensitizes..."
+            }]
+        },
+        {
+            category: "Mindfulness & Relaxation",
+            strategies: [{
+                name: "Deep Breathing Exercises",
+                detail: "Calms physiological stress..."
+            }, {
+                name: "Mindfulness Meditation",
+                detail: "Increases present-moment awareness..."
+            }, {
+                name: "Progressive Muscle Relaxation",
+                detail: "Releases physical tension..."
+            }, {name: "Journaling Fears and Anxieties", detail: "Provides emotional release..."}]
+        },
+        {
+            category: "Seeking Support",
+            strategies: [{
+                name: "Talking to a Mentor, Peer, or Trusted Friend",
+                detail: "Normalizes struggle..."
+            }, {name: "Joining a Study Group or Learning Community", detail: "Provides belonging..."}]
+        }
+    ];
+
+    const smartGoalData = [
+        {
+            component: "S",
+            name: "Specific",
+            placeholder: "What exactly do you want to achieve?...",
+            exampleLang: "Learn conversational Spanish...",
+            exampleProg: "Learn Python & Django..."
+        },
+        {
+            component: "M",
+            name: "Measurable",
+            placeholder: "How will you track progress?...",
+            exampleLang: "5 Duolingo lessons/day...",
+            exampleProg: "1 Python module/wk..."
+        },
+        {
+            component: "A",
+            name: "Achievable",
+            placeholder: "Is this realistic?...",
+            exampleLang: "Allocate 1hr/weekday...",
+            exampleProg: "Dedicate 10hrs/wk..."
+        },
+        {
+            component: "R",
+            name: "Relevant",
+            placeholder: "Why is this goal important?...",
+            exampleLang: "Relevant for travel...",
+            exampleProg: "Relevant for web developer career..."
+        },
+        {
+            component: "T",
+            name: "Time-bound",
+            placeholder: "What is your deadline?...",
+            exampleLang: "Basic conversational level (A2) in 12 months...",
+            exampleProg: "Functional website in 6 months..."
+        }
+    ];
+
+    const pitfallsData = [
+        {
+            pitfall: "Impatience/Unrealistic Expectations",
+            driver: "Temporal discounting...",
+            strategy: "Set SMART goals..."
+        },
+        {
+            pitfall: "Lack of Structure/Aimlessness",
+            driver: "Cognitive overload...",
+            strategy: "Develop a scaffolded learning plan..."
+        },
+        {
+            pitfall: "Fear of Failure/Imposter Syndrome",
+            driver: "Low self-efficacy...",
+            strategy: "Reframe failure as learning..."
+        },
+        {
+            pitfall: "Misaligned Learning Methods",
+            driver: "Frustration due to ineffective learning...",
+            strategy: "Identify personal learning style..."
+        },
+        {
+            pitfall: "Losing Motivation/Forgetting \"Why\"",
+            driver: "Disconnect from intrinsic rewards...",
+            strategy: "Regularly revisit core values..."
+        },
+        {
+            pitfall: "Burnout/Learning Fatigue",
+            driver: "Chronic stress...",
+            strategy: "Prioritize comprehensive self-care..."
+        },
+        {
+            pitfall: "Feeling Overwhelmed by Complexity",
+            driver: "Cognitive overload...",
+            strategy: "Break down complex tasks..."
+        },
+        {
+            pitfall: "Lack of Progress/Learning Plateaus",
+            driver: "Ineffective strategies...",
+            strategy: "Vary learning routine/methods..."
+        }
+    ];
+
+    function populateInteractiveTable(containerId, data, cardRenderer) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = ''; // Clear previous content
+        data.forEach(item => {
+            container.appendChild(cardRenderer(item));
+        });
+    }
+
+    function createProcrastinationCard(item) {
+        const card = document.createElement('div');
+        card.className = 'table-card bg-white rounded-lg shadow p-4 hover:shadow-lg';
+        card.innerHTML = `
+            <div class="table-card-header flex justify-between items-center">
+                <h5 class="text-md font-semibold text-orange-600">${item.root}</h5>
+                <span class="text-orange-500 transform transition-transform duration-300">▼</span>
+            </div>
+            <div class="table-card-content mt-2 text-sm text-slate-600">
+                <p><strong>Mechanism:</strong> ${item.mechanism}</p>
+                <p class="mt-1"><strong>Coping Strategy:</strong> ${item.strategy}</p>
+            </div>`;
+        card.querySelector('.table-card-header').addEventListener('click', () => {
+            card.classList.toggle('open');
+            card.querySelector('.table-card-header span').classList.toggle('rotate-180');
+        });
+        return card;
+    }
+
+    function createMindsetRow(item) {
+        const row = document.createElement('div');
+        row.className = 'p-4 border border-slate-200 rounded-lg bg-slate-50';
+        row.innerHTML = `
+            <h5 class="text-md font-semibold text-slate-700 mb-2">${item.aspect}</h5>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <div><p class="font-medium text-red-600">Fixed Mindset:</p><p class="text-slate-600">${item.fixed}</p></div>
+                <div><p class="font-medium text-green-600">Growth Mindset:</p><p class="text-slate-600">${item.growth}</p></div>
+            </div>
+            <p class="mt-2 text-sm text-orange-600 italic"><strong class="font-semibold">The Power of "Yet":</strong> ${item.yet}</p>`;
+        return row;
+    }
+
+    function createDiscomfortAccordionItem(item) {
+        const accItem = document.createElement('div');
+        accItem.className = 'table-card bg-white rounded-lg shadow';
+        let strategiesHtml = item.strategies.map(s => `<div class="p-3 border-t border-slate-200"><p class="font-semibold text-slate-700">${s.name}</p><p class="text-sm text-slate-600">${s.detail}</p></div>`).join('');
+        accItem.innerHTML = `
+            <div class="table-card-header p-4 flex justify-between items-center">
+                <h5 class="text-md font-semibold text-sky-700">${item.category}</h5>
+                <span class="text-sky-600 transform transition-transform duration-300">▼</span>
+            </div>
+            <div class="table-card-content">${strategiesHtml}</div>`;
+        accItem.querySelector('.table-card-header').addEventListener('click', () => {
+            accItem.classList.toggle('open');
+            accItem.querySelector('.table-card-header span').classList.toggle('rotate-180');
+        });
+        return accItem;
+    }
+
+    function populateSmartGoalSetter() {
+        const container = document.getElementById('smartGoalSetter');
+        if (!container) return;
+        container.innerHTML = ''; // Clear previous content
+        smartGoalData.forEach(item => {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <label for="smart-${item.component.toLowerCase()}" class="block text-sm font-medium text-slate-700">
+                    <span class="text-lg font-bold text-orange-600">${item.component}</span> - ${item.name}
+                </label>
+                <textarea id="smart-${item.component.toLowerCase()}" rows="2" class="smart-goal-input mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm p-2" placeholder="${item.placeholder}"></textarea>
+                <p class="mt-1 text-xs text-slate-500">E.g., (Language): ${item.exampleLang}</p>
+                <p class="text-xs text-slate-500">E.g., (Programming): ${item.exampleProg}</p>`;
+            container.appendChild(div);
+        });
+    }
+
+    function createPitfallCard(item) {
+        const card = document.createElement('div');
+        card.className = 'table-card bg-white rounded-lg shadow p-4 hover:shadow-lg';
+        card.innerHTML = `
+            <div class="table-card-header flex justify-between items-center">
+                <h5 class="text-md font-semibold text-red-600">${item.pitfall}</h5>
+                <span class="text-red-500 transform transition-transform duration-300">▼</span>
+            </div>
+            <div class="table-card-content mt-2 text-sm text-slate-600">
+                <p><strong>Underlying Driver:</strong> ${item.driver}</p>
+                <p class="mt-1"><strong>Preventative/Counter-Strategy:</strong> ${item.strategy}</p>
+            </div>`;
+        card.querySelector('.table-card-header').addEventListener('click', () => {
+            card.classList.toggle('open');
+            card.querySelector('.table-card-header span').classList.toggle('rotate-180');
+        });
+        return card;
+    }
+
+    // Gemini API Integration
+    const apiKey = ""; // Intentionally empty, will be handled by the environment
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    async function callGeminiAPI(prompt) {
+        const payload = {
+            contents: [{role: "user", parts: [{text: prompt}]}]
+        };
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("API Error:", errorData);
+                throw new Error(`API request failed with status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+            }
+            const result = await response.json();
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                return result.candidates[0].content.parts[0].text;
+            } else {
+                console.error("Unexpected API response structure:", result);
+                throw new Error("Failed to get a valid response from the AI. The response structure was unexpected.");
+            }
+        } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            throw error; // Re-throw to be caught by the caller
+        }
+    }
+
+    // Personalized Strategy Advisor
+    const challengeInput = document.getElementById('challengeInput');
+    const getAIAdviceButton = document.getElementById('getAIAdviceButton');
+    const aiAdviceOutput = document.getElementById('aiAdviceOutput');
+
+    if (getAIAdviceButton) {
+        getAIAdviceButton.addEventListener('click', async () => {
+            const userChallenge = challengeInput.value.trim();
+            if (!userChallenge) {
+                showModal("Please describe your learning challenge first.");
+                return;
+            }
+            showModal("✨ Our AI is thinking of some advice for you...", true);
+            aiAdviceOutput.classList.add('hidden');
+            aiAdviceOutput.innerHTML = '';
+
+            const prompt = `Based on the principles of overcoming learning discomfort, building a resilient mindset, and applying effective learning strategies (as outlined in a guide about learning new languages or programming), please provide 2-3 actionable and encouraging pieces of advice for someone facing the following challenge: "${userChallenge}". Focus on strategies like mindset shifts, breaking down tasks, managing emotions, or seeking support. Keep the advice concise and directly applicable.`;
+
+            try {
+                const advice = await callGeminiAPI(prompt);
+                aiAdviceOutput.innerHTML = advice.replace(/\n/g, '<br>'); // Simple formatting
+                aiAdviceOutput.classList.remove('hidden');
+                hideModal();
+            } catch (error) {
+                aiAdviceOutput.innerHTML = `<p class="text-red-600">Sorry, I couldn't get advice right now. Error: ${error.message}</p>`;
+                aiAdviceOutput.classList.remove('hidden');
+                showModal(`Error fetching advice: ${error.message}`);
+            }
+        });
+    }
+
+    // SMART Goal Enhancer
+    const enhanceGoalButton = document.getElementById('enhanceGoalButton');
+    const enhancedGoalOutput = document.getElementById('enhancedGoalOutput');
+
+    if (enhanceGoalButton) {
+        enhanceGoalButton.addEventListener('click', async () => {
+            const smartInputs = document.querySelectorAll('#smartGoalSetter textarea.smart-goal-input');
+            let goalText = "Here's my draft SMART goal:\n";
+            let filledCount = 0;
+            smartGoalData.forEach(item => {
+                const inputElement = document.getElementById(`smart-${item.component.toLowerCase()}`);
+                const value = inputElement ? inputElement.value.trim() : '';
+                goalText += `${item.name} (${item.component}): ${value || 'Not specified'}\n`;
+                if (value) filledCount++;
+            });
+
+            if (filledCount === 0) {
+                showModal("Please fill in at least one part of your SMART goal first.");
+                return;
+            }
+
+            showModal("✨ Our AI is enhancing your SMART goal...", true);
+            enhancedGoalOutput.classList.add('hidden');
+            enhancedGoalOutput.innerHTML = '';
+
+            const prompt = `A user is working on setting SMART goals for learning. Here is their current draft:
+            ${goalText}
+            Please analyze this draft and provide suggestions to make it even more effective. Specifically:
+            1. Briefly comment on the current strengths or weaknesses of each component (Specific, Measurable, Achievable, Relevant, Time-bound).
+            2. Offer 2-3 concrete suggestions to refine or expand on their goal, potentially breaking down 'Achievable' parts into smaller steps, or suggesting ways to make it more measurable or specific.
+            3. If appropriate, suggest one type of resource or learning activity that might be helpful for this kind of goal.
+            Keep the tone encouraging and constructive. Format the response clearly.`;
+
+            try {
+                const enhancedGoal = await callGeminiAPI(prompt);
+                enhancedGoalOutput.innerHTML = enhancedGoal.replace(/\n/g, '<br>'); // Simple formatting
+                enhancedGoalOutput.classList.remove('hidden');
+                hideModal();
+            } catch (error) {
+                enhancedGoalOutput.innerHTML = `<p class="text-red-600">Sorry, I couldn't enhance the goal right now. Error: ${error.message}</p>`;
+                enhancedGoalOutput.classList.remove('hidden');
+                showModal(`Error enhancing goal: ${error.message}`);
+            }
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        populateInteractiveTable('procrastinationTable', procrastinationData, createProcrastinationCard);
+        populateInteractiveTable('mindsetTable', mindsetData, createMindsetRow);
+        populateInteractiveTable('discomfortToolkit', discomfortToolkitData, createDiscomfortAccordionItem);
+        populateSmartGoalSetter();
+        populateInteractiveTable('pitfallsTable', pitfallsData, createPitfallCard);
+        showSection(window.location.hash || '#introduction');
+    });
+
+</script>
+</body>
+</html>
